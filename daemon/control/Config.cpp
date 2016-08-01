@@ -14,8 +14,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Config.h"
-#include <codecvt>
 #include "util/file_util.h"
+#include <boost/asio/ip/host_name.hpp>
+#include <codecvt>
 
 #if BOOST_OS_LINUX || BOOST_OS_BSD || BOOST_OS_UNIX
 #   include <pwd.h>

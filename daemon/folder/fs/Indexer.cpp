@@ -19,9 +19,12 @@
 #include "IgnoreList.h"
 
 #include "Client.h"
-#include "util/byte_convert.h"
-#include <rabin.h>
+#include <util/byte_convert.h>
 #include <util/file_util.h>
+
+#include <rabin.h>
+#include <librevault/crypto/AES_CBC.h>
+#include <librevault/crypto/HMAC-SHA3.h>
 
 namespace librevault {
 

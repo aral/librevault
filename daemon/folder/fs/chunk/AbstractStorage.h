@@ -15,7 +15,7 @@
  */
 #pragma once
 #include <librevault/Meta.h>
-#include "util/Loggable.h"
+#include <memory>
 
 namespace librevault {
 

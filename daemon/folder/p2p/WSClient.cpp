@@ -13,6 +13,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <librevault/crypto/Hex.h>
 #include "WSClient.h"
 #include "Client.h"
 #include "P2PFolder.h"

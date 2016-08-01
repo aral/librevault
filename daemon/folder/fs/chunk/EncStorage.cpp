@@ -13,9 +13,10 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include <util/file_util.h>
 #include "EncStorage.h"
 #include "folder/fs/FSFolder.h"
+#include <util/file_util.h>
+#include <librevault/crypto/Base32.h>
 
 namespace librevault {
 

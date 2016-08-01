@@ -22,6 +22,8 @@
 
 #include <docopt.h>
 
+#include <boost/signals2/signal.hpp>
+
 namespace librevault {
 
 /* Components */

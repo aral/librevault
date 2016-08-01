@@ -23,6 +23,10 @@
 
 #include "../Client.h"
 
+#include <librevault/crypto/Base32.h>
+
+#include <boost/range/adaptor/map.hpp>
+
 namespace librevault {
 
 /* MissingChunk */

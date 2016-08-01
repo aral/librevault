@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Alexander Shishenko <GamePad64@gmail.com>
+/* Copyright (C) 2016 Alexander Shishenko <GamePad64@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,22 +13,11 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "Client.h"
-#include "AbstractFolder.h"
-#include <librevault/crypto/Base32.h>
+#pragma once
+#include <boost/filesystem/path.hpp>
 
 namespace librevault {
 
-AbstractFolder::AbstractFolder(Client& client) :
-	Loggable(client), client_(client) {}
-AbstractFolder::~AbstractFolder() {}
-
-std::string AbstractFolder::path_id_readable(const blob& path_id) {
-	return crypto::Base32().to_string(path_id);
-}
-
-std::string AbstractFolder::ct_hash_readable(const blob& ct_hash) {
-	return crypto::Base32().to_string(ct_hash);
-}
+namespace fs = boost::filesystem;
 
 } /* namespace librevault */

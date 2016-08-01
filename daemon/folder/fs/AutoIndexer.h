@@ -24,6 +24,8 @@
 
 namespace librevault {
 
+using boost::asio::io_service;
+
 class AutoIndexer : public Loggable {
 public:
 	AutoIndexer(FSFolder& dir, Client& client);

@@ -13,12 +13,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "pch.h"
 #include "Client.h"
 #include "Version.h"
 #include "control/Config.h"
-#include <librevault/Secret.h>
+#include <boost/locale.hpp>
 #include <docopt.h>
+#include <librevault/Secret.h>
 
 using namespace librevault;	// This is allowed only because this is main.cpp file and it is extremely unlikely that this file will be included in any other file.
 

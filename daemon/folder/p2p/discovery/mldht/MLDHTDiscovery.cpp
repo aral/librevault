@@ -23,6 +23,7 @@
 #include "folder/fs/FSFolder.h"
 #include "dht.h"
 #include "folder/p2p/nat/PortManager.h"
+#include <cryptopp/osrng.h>
 
 namespace librevault {
 

@@ -16,8 +16,9 @@
 #include "../../pch.h"
 #include "../../util/Loggable.h"
 #pragma once
+#include <cryptopp/eccrypto.h>
 #include <openssl/x509.h>
-//#include <openssl/ssl.h>
+#include <librevault/definitions.h>
 
 namespace librevault {
 

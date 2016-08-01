@@ -16,6 +16,7 @@
 #pragma once
 #include "pch.h"
 #include "folder/p2p/discovery/DiscoveryService.h"
+#include "util/network.h"
 
 namespace librevault {
 

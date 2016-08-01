@@ -16,10 +16,11 @@
 
 #pragma once
 
+#include "fs.h"
+
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/stream.hpp>
 #include <boost/iostreams/stream_buffer.hpp>
-#include <boost/iostreams/device/null.hpp>
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/locale.hpp>
 
@@ -98,7 +99,7 @@ public:
 	}
 };
 
-static void file_move(const boost::filesystem::path& from, const boost::filesystem::path& to) {
+inline void file_move(const boost::filesystem::path& from, const boost::filesystem::path& to) {
 	boost::filesystem::remove(to);
 	try {
 		boost::filesystem::create_directories(to.parent_path());

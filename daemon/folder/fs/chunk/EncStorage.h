@@ -16,6 +16,8 @@
 #pragma once
 #include "pch.h"
 #include "AbstractStorage.h"
+#include "util/fs.h"
+#include "util/Loggable.h"
 
 namespace librevault {
 

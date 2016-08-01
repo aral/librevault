@@ -16,6 +16,7 @@
 #pragma once
 #include "pch.h"
 #include <util/Loggable.h>
+#include <boost/signals2/signal.hpp>
 #include <shared_mutex>
 
 namespace librevault {

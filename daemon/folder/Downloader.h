@@ -26,6 +26,10 @@
 #define IMMEDIATE_COEFFICIENT 20.0f
 #define RARITY_COEFFICIENT 25.0f
 
+#ifndef FOPEN_BACKEND
+#   include <boost/iostreams/device/mapped_file.hpp>
+#endif
+
 namespace librevault {
 
 class Client;

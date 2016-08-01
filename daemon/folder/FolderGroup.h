@@ -24,6 +24,8 @@
 #include <librevault/SignedMeta.h>
 #include <librevault/util/bitfield_convert.h>
 
+#include <boost/signals2/signal.hpp>
+
 namespace librevault {
 
 class Client;

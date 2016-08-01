@@ -17,6 +17,7 @@
 #pragma once
 #include "NodeKey.h"
 #include "util/Loggable.h"
+#include "util/network.h"
 
 namespace librevault {
 

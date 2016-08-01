@@ -1,4 +1,4 @@
-/* Copyright (C) 2015 Alexander Shishenko <GamePad64@gmail.com>
+/* Copyright (C) 2016 Alexander Shishenko <GamePad64@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,22 +13,28 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include "Client.h"
-#include "AbstractFolder.h"
-#include <librevault/crypto/Base32.h>
+#pragma once
+
+#include <boost/asio/ip/udp.hpp>
+#include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/ssl/stream.hpp>
 
 namespace librevault {
 
-AbstractFolder::AbstractFolder(Client& client) :
-	Loggable(client), client_(client) {}
-AbstractFolder::~AbstractFolder() {}
+using boost::asio::ip::address;
+using boost::asio::ip::address_v4;
+using boost::asio::ip::address_v6;
 
-std::string AbstractFolder::path_id_readable(const blob& path_id) {
-	return crypto::Base32().to_string(path_id);
-}
+using udp_resolver = boost::asio::ip::udp::resolver;
+using tcp_resolver = boost::asio::ip::tcp::resolver;
 
-std::string AbstractFolder::ct_hash_readable(const blob& ct_hash) {
-	return crypto::Base32().to_string(ct_hash);
-}
+using udp_endpoint = boost::asio::ip::udp::endpoint;
+using tcp_endpoint = boost::asio::ip::tcp::endpoint;
+
+using udp_socket = boost::asio::ip::udp::socket;
+using tcp_socket = boost::asio::ip::tcp::socket;
+
+using ssl_socket = boost::asio::ssl::stream<tcp_socket>;
+using ssl_context = boost::asio::ssl::context;
 
 } /* namespace librevault */

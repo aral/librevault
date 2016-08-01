@@ -25,6 +25,8 @@
 
 #include "util/make_relpath.h"
 
+#include <boost/locale/conversion.hpp>
+#include <boost/locale/encoding_utf.hpp>
 #include <codecvt>
 
 namespace librevault {

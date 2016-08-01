@@ -16,8 +16,13 @@
 #include "NodeKey.h"
 #include "Client.h"
 #include "control/Config.h"
-#include <openssl/pem.h>
 #include "util/file_util.h"
+#include <cryptopp/ecp.h>
+#include <cryptopp/oids.h>
+#include <cryptopp/osrng.h>
+#include <librevault/crypto/Hex.h>
+#include <openssl/pem.h>
+#include <librevault/crypto/Base64.h>
 
 namespace librevault {
 

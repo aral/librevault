@@ -14,10 +14,10 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
-#include "pch.h"
-#include <boost/signals2/signal.hpp>
+#include "util/fs.h"
 #include <librevault/Meta.h>
 #include <librevault/util/bitfield_convert.h>
+#include <boost/signals2/signal.hpp>
 
 namespace librevault {
 

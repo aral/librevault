@@ -14,9 +14,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 #pragma once
+#include <librevault/definitions.h>
 #include <librevault/util/bitfield_convert.h>
 #include "util/Loggable.h"
-#include "pch.h"
 
 namespace librevault {
 
