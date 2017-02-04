@@ -17,21 +17,24 @@ include(cotire)
 # Components
 option(BUILD_DAEMON "Build sync daemon" ON)
 if((OS_WIN AND OS_32bit) OR NOT OS_WIN)
-	set(DEFAULT_BUILD_GUI ON)
+	set(DEFAULT_BUILD_TOOLS ON)
 else()
-	set(DEFAULT_BUILD_GUI OFF)
+	set(DEFAULT_BUILD_TOOLS OFF)
 endif()
-option(BUILD_GUI "Build GUI" ${DEFAULT_BUILD_GUI})
+option(BUILD_GUI "Build GUI" ${DEFAULT_BUILD_TOOLS})
+option(BUILD_CLI "Build CLI" ${DEFAULT_BUILD_TOOLS})
 
 # Parameters
 option(BUILD_STATIC "Build static version of executable" OFF)
 option(BUILD_UPDATER "Add auto-updater support" ON)
 option(USE_BUNDLED_SQLITE3 "Force using bundled version of SQLite3" OFF)
 option(USE_BUNDLED_MINIUPNP "Force using bundled version of miniupnp" OFF)
+option(USE_COTIRE "Use cotire to speed up builds (probably)" ON)
 option(DEBUG_NORMALIZATION "Debug path normalization" OFF)
 option(DEBUG_WEBSOCKETPP "Debug websocket++" OFF)
 option(DEBUG_QT "Enable qDebug" OFF)
 set(SANITIZE "false" CACHE STRING "What sanitizer to use. false for nothing")
+option(INSTALL_BUNDLE "Prepare a bundle with all dependencies" OFF)
 
 #============================================================================
 # Internal compiler options
@@ -208,7 +211,9 @@ add_subdirectory("contrib/rabin")
 add_subdirectory("contrib/dht")
 
 ## QtSingleApplication
+if(BUILD_CLI OR BUILD_GUI)
 add_subdirectory("contrib/qtsingleapplication")
+endif()
 
 ## Spdlog
 find_package(spdlog QUIET)
@@ -265,7 +270,7 @@ target_include_directories(boost INTERFACE ${Boost_INCLUDE_DIRS})
 target_link_libraries(boost INTERFACE ${Boost_LIBRARIES})
 
 ## Qt5
-if(BUILD_GUI)
+if(BUILD_GUI OR BUILD_CLI)
 	set(Qt_COMPONENTS
 			LinguistTools
 			Svg
@@ -307,7 +312,7 @@ endif()
 ## ICU (needed for boost::locale and Qt)
 add_library(icu INTERFACE)
 if(OS_LINUX)
-	find_package(ICU REQUIRED COMPONENTS i18n io le lx uc data)
+	find_package(ICU REQUIRED COMPONENTS i18n io uc data)
 	target_link_libraries(icu INTERFACE ICU::ICU)
 	target_link_libraries(icu INTERFACE dl)
 endif()
@@ -317,12 +322,14 @@ endif()
 #============================================================================
 
 add_subdirectory("lvproto")
-add_subdirectory("cli")
 if(BUILD_DAEMON)
 	add_subdirectory("daemon")
 endif()
 if(BUILD_GUI)
 	add_subdirectory("gui")
+endif()
+if(BUILD_CLI)
+	add_subdirectory("cli")
 endif()
 
 include(Install.cmake)

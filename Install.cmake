@@ -52,6 +52,13 @@ if(OS_WINDOWS)
 	install(FILES ${CMAKE_CURRENT_BINARY_DIR}/Librevault.iss DESTINATION ${LV_PACKAGING_PATH} COMPONENT librevault-installscripts)
 
 elseif(OS_LINUX)
+	if(INSTALL_BUNDLE)
+		set(CMAKE_INSTALL_BINDIR opt/librevault/bin/elf)
+		set(CMAKE_INSTALL_SHIMDIR opt/librevault/bin)
+		set(CMAKE_INSTALL_LIBDIR opt/librevault/lib)
+		set(CMAKE_INSTALL_DATAROOTDIR usr/share)
+	endif()
+
 	if(BUILD_DAEMON)
 		install(PROGRAMS $<TARGET_FILE:librevault-daemon> DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT librevault-package)
 	endif()
@@ -60,28 +67,36 @@ elseif(OS_LINUX)
 		install(FILES "gui/resources/Librevault.desktop" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/applications)
 		install(FILES "gui/resources/librevault_icon.svg" DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/icons/hicolor/scalable/apps RENAME "librevault.svg")
 	endif()
-	if(BUILD_DAEMON AND BUILD_GUI AND BUILD_STATIC)
+	if(BUILD_CLI)
+		install(PROGRAMS $<TARGET_FILE:librevault-cli> DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT librevault-package)
+	endif()
+
+	if(INSTALL_BUNDLE AND BUILD_DAEMON AND BUILD_GUI AND BUILD_CLI)
 		include(InstallQt5Plugin)
 
-		list(APPEND DEPENDENCY_BINARIES ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/librevault-daemon)
-		list(APPEND DEPENDENCY_BINARIES ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/librevault-gui)
+		list(APPEND INSTALLED_BINARIES ${CMAKE_INSTALL_BINDIR}/librevault-daemon)
+		list(APPEND INSTALLED_BINARIES ${CMAKE_INSTALL_BINDIR}/librevault-gui)
+		list(APPEND INSTALLED_BINARIES ${CMAKE_INSTALL_BINDIR}/librevault-cli)
 
-		# Install Qt5 plugins and library dependencies
-		set(BUNDLE_PLUGINS_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/qt5/plugins)
+		# Install Qt5 plugins
+		set(BUNDLE_PLUGINS_PATH ${CMAKE_INSTALL_LIBDIR}/qt5/plugins)
+		install_qt5_plugin("Qt5::QMinimalIntegrationPlugin" QT_PLUGIN "${BUNDLE_PLUGINS_PATH}")
 		install_qt5_plugin("Qt5::QXcbIntegrationPlugin" QT_PLUGIN "${BUNDLE_PLUGINS_PATH}")
 		install_qt5_plugin("Qt5::QSvgPlugin" QT_PLUGIN "${BUNDLE_PLUGINS_PATH}")
 		install_qt5_plugin("Qt5::QSvgIconPlugin" QT_PLUGIN "${BUNDLE_PLUGINS_PATH}")
 
-		list(APPEND DEPENDENCY_BINARIES ${QT_PLUGIN})
-
+		list(APPEND INSTALLED_BINARIES ${QT_PLUGIN})
 		list(APPEND DEPENDENCY_RESOLVE_PATHS "${Qt5_DIR}/../..")
+		list(APPEND DEPENDENCY_RESOLVE_PATHS "/usr/lib")
 
+		# Dependencies of targets and plugins
 		install(CODE "
 			include(GetPrerequisites)
-			foreach(DEPENDENCY_BINARY ${DEPENDENCY_BINARIES})
-				get_prerequisites(\"\${DEPENDENCY_BINARY}\" DEPENDENT_BINARIES 1 1 \"\" \"${DEPENDENCY_RESOLVE_PATHS}\")
-				foreach(DEPENDENT_BINARY \${DEPENDENT_BINARIES})
-					gp_resolve_item(\"\${DEPENDENCY_BINARY}\" \"\${DEPENDENT_BINARY}\" \"\" \"\" resolved_file)
+
+			foreach(INSTALLED_BINARY ${INSTALLED_BINARIES})
+				get_prerequisites(\"\${CMAKE_INSTALL_PREFIX}/\${INSTALLED_BINARY}\" DEPENDENCY_BINARIES 0 1 \"\" \"${DEPENDENCY_RESOLVE_PATHS}\")
+				foreach(DEPENDENCY_BINARY \${DEPENDENCY_BINARIES})
+					gp_resolve_item(\"\${CMAKE_INSTALL_PREFIX}/\${INSTALLED_BINARY}\" \"\${DEPENDENCY_BINARY}\" \"\" \"\" resolved_file)
 					get_filename_component(resolved_file \${resolved_file} ABSOLUTE)
 					gp_append_unique(PREREQUISITE_LIBS \${resolved_file})
 					get_filename_component(file_canonical \${resolved_file} REALPATH)
@@ -98,15 +113,22 @@ elseif(OS_LINUX)
 		# qt.conf
 		install(FILES "packaging/appimage/qt.conf" DESTINATION ${CMAKE_INSTALL_BINDIR} COMPONENT librevault-package)
 
-		# Install AppImage dependencies: AppRun, .desktop file and icon
-		set(APPDIR_ROOT "${CMAKE_INSTALL_PREFIX}/..")
-		install(FILES "packaging/appimage/AppRun" DESTINATION "${APPDIR_ROOT}")
-		install(FILES "gui/resources/Librevault.desktop" DESTINATION "${APPDIR_ROOT}")
-		install(FILES "gui/resources/librevault_icon.svg" DESTINATION "${APPDIR_ROOT}" RENAME "librevault.svg")
-
+		# Install ld-linux.so runtime
 		install(CODE "
-			execute_process(COMMAND /bin/chmod \"+x\" \"${APPDIR_ROOT}/AppRun\")
-		" COMPONENT librevault-package)
+			execute_process(
+				COMMAND ldd \"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}/librevault-daemon\"
+				COMMAND grep -oP \"(\\\\S*ld-linux\\\\S*)\"
+				OUTPUT_VARIABLE ELF_INTERPRETER_LINK
+				OUTPUT_STRIP_TRAILING_WHITESPACE
+			)
+			execute_process(COMMAND readlink -f \${ELF_INTERPRETER_LINK} OUTPUT_VARIABLE ELF_INTERPRETER OUTPUT_STRIP_TRAILING_WHITESPACE)
+		")
+		install(PROGRAMS "/\${ELF_INTERPRETER}" DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME "ld-linux.so")
+
+		# Install ld-linux shims
+		install(PROGRAMS "packaging/linux-standalone/shim_daemon.sh" DESTINATION ${CMAKE_INSTALL_SHIMDIR} RENAME "librevault-daemon")
+		install(PROGRAMS "packaging/linux-standalone/shim_gui.sh" DESTINATION ${CMAKE_INSTALL_SHIMDIR} RENAME "librevault-gui")
+		install(PROGRAMS "packaging/linux-standalone/shim_cli.sh" DESTINATION ${CMAKE_INSTALL_SHIMDIR} RENAME "librevault-cli")
 	endif()
 elseif(OS_MAC)
 	set(CPACK_GENERATOR "Bundle")
@@ -120,11 +142,6 @@ elseif(OS_MAC)
 	set(CPACK_BUNDLE_PLIST_SOURCE "${CMAKE_SOURCE_DIR}/packaging/osx/Info.plist")
 	set(CPACK_BUNDLE_PLIST "${CMAKE_CURRENT_BINARY_DIR}/Info.plist")
 	set(CPACK_BUNDLE_ICON "${CMAKE_SOURCE_DIR}/packaging/osx/Librevault.icns")
-
-	# Apple Code Signing. Change if trying to build anywhere else!
-	if(NOT LV_NO_SIGN)
-		set(CPACK_BUNDLE_APPLE_CERT_APP "814C24AEF04E33147793E6E2C55454F4062A2535")
-	endif()
 
 	configure_file("${CPACK_BUNDLE_PLIST_SOURCE}" "${CPACK_BUNDLE_PLIST}" @ONLY)
 
@@ -145,6 +162,7 @@ elseif(OS_MAC)
 	# Qt5 plugins
 	if(BUILD_GUI)
 		include(InstallQt5Plugin)
+		install_qt5_plugin("Qt5::QMinimalIntegrationPlugin" QT_PLUGIN "${BUNDLE_PLUGINS_PATH}")
 		install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGIN "${BUNDLE_PLUGINS_PATH}")
 		install_qt5_plugin("Qt5::QSvgPlugin" QT_PLUGIN "${BUNDLE_PLUGINS_PATH}")
 		install_qt5_plugin("Qt5::QSvgIconPlugin" QT_PLUGIN "${BUNDLE_PLUGINS_PATH}")
